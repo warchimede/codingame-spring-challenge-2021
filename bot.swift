@@ -6,6 +6,46 @@ public struct StderrOutputStream: TextOutputStream {
 }
 public var errStream = StderrOutputStream()
 
+////////////////////////////////////////////////////////////////////////////
+enum Action: ExpressibleByStringLiteral, CustomStringConvertible {
+    case wait
+    case complete(Int)
+
+    init(stringLiteral value: String) {
+        if value == "WAIT" {
+            self = .wait
+        } else {
+            let index = Int(value.split(separator: " ")[1])!
+            self = .complete(index)
+        }
+    }
+
+    var description: String {
+        switch self {
+            case .wait: return "WAIT"
+            case .complete(let index): return "COMPLETE \(index)"
+        }
+    }
+}
+
+func computeAction(possibleActions: [Action], sun: Int) -> Action {
+    var possibleActions = possibleActions.sorted {
+        switch ($0, $1) {
+            case (.wait, .wait): return true
+            case (_, .wait): return true
+            case (.wait, _): return false
+            case (.complete(let idx0), .complete(let idx1)): return idx0 < idx1
+        }
+    }
+
+    if sun >= 4 {
+        return possibleActions.first!
+    } else {
+        return .wait
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+
 /**
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
@@ -48,16 +88,18 @@ while true {
         }
     }
     let numberOfPossibleActions = Int(readLine()!)! // all legal actions
+    var possibleActions: [Action] = []
     if numberOfPossibleActions > 0 {
         for i in 0...(numberOfPossibleActions-1) {
             let possibleAction = readLine()! // try printing something from here to start with
+            possibleActions.append(Action(stringLiteral: possibleAction))
         }
     }
 
     // Write an action using print("message...")
     // To debug: print("Debug messages...", to: &errStream)
-
+    let action = computeAction(possibleActions: possibleActions, sun: sun)
 
     // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
-    print("WAIT")
+    print(action.description)
 }
