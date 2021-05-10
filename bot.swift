@@ -124,9 +124,12 @@ func computeAction(possibleActions: [Action], day: Int) -> Action {
     let seed = seedActions(from: possibleActions)
     let complete = completeActions(from: possibleActions)
 
-    return complete.first ?? grow.first ?? seed.first ?? .wait
+    if day <= 18 {
+        return grow.first ?? seed.first ?? .wait
+    } else {
+        return complete.first ?? grow.first ?? seed.first ?? .wait
+    }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 
