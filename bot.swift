@@ -96,8 +96,8 @@ func seedActions(from possibleActions: [Action]) -> [Action] {
     }
     .sorted {
         if case let .seed(source: _, target: target0) = $0,
-            case let .seed(source: _, target: target1) = $1 {
-                return target0 < target1
+           case let .seed(source: _, target: target1) = $1 {
+            return target0 < target1
         }
         return false
     }
@@ -125,7 +125,7 @@ func computeAction(possibleActions: [Action], day: Int) -> Action {
     let complete = completeActions(from: possibleActions)
 
     if day <= 18 {
-        return grow.first ?? seed.first ?? .wait
+        return grow.first ?? seed.first ?? .wait    
     } else {
         return complete.first ?? grow.first ?? seed.first ?? .wait
     }
