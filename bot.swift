@@ -71,22 +71,60 @@ struct Cell {
     let neigh5: Int
 }
 
-func computeAction(possibleActions: [Action], sun: Int) -> Action {
-    let possibleActions = possibleActions.sorted {
-        switch ($0, $1) {
-            case (.wait, .wait): return true
-            case (_, .wait): return true
-            case (.wait, _): return false
-            case (.complete(let idx0), .complete(let idx1)): return idx0 < idx1
-            default: return true
+func growActions(from possibleActions: [Action]) -> [Action] {
+    return possibleActions.filter {
+        switch $0 {
+            case .grow(_): return true
+            default: return false
         }
     }
-
-    if sun >= 4 {
-        return possibleActions.first!
-    } else {
-        return .wait
+    .sorted {
+        if case let .grow(idx0) = $0,
+            case let .grow(idx1) = $1 {
+                return idx0 < idx1
+        }
+        return false
     }
+}
+
+func seedActions(from possibleActions: [Action]) -> [Action] {
+    return possibleActions.filter {
+        switch $0 {
+            case .seed(source: _, target: _): return true
+            default: return false
+        }
+    }
+    .sorted {
+        if case let .seed(source: _, target: target0) = $0,
+            case let .seed(source: _, target: target1) = $1 {
+                return target0 < target1
+        }
+        return false
+    }
+}
+
+func completeActions(from possibleActions: [Action]) -> [Action] {
+    return possibleActions.filter {
+        switch $0 {
+            case .complete(_): return true
+            default: return false
+        }
+    }
+    .sorted {
+        if case let .complete(idx0) = $0,
+            case let .complete(idx1) = $1 {
+                return idx0 < idx1
+        }
+        return false
+    }
+}
+
+func computeAction(possibleActions: [Action], day: Int) -> Action {
+    let grow = growActions(from: possibleActions)
+    let seed = seedActions(from: possibleActions)
+    let complete = completeActions(from: possibleActions)
+
+    return complete.first ?? grow.first ?? seed.first ?? .wait
 }
 
 
@@ -146,14 +184,13 @@ while true {
         for i in 0...(numberOfPossibleActions-1) {
             let possibleAction = readLine()! // try printing something from here to start with
             let action = Action(stringLiteral: possibleAction)
-            print(action, to: &errStream)
             possibleActions.append(action)
         }
     }
 
     // Write an action using print("message...")
     // To debug: print("Debug messages...", to: &errStream)
-    let action = computeAction(possibleActions: possibleActions, sun: sun)
+    let action = computeAction(possibleActions: possibleActions, day: day)
 
     // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
     print(action.description)
