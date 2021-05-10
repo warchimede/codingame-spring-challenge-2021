@@ -8,33 +8,77 @@ public var errStream = StderrOutputStream()
 
 ////////////////////////////////////////////////////////////////////////////
 enum Action: ExpressibleByStringLiteral, CustomStringConvertible {
-    case wait
+    private static let COMPLETE = "COMPLETE"
+    private static let GROW = "GROW"
+    private static let SEED = "SEED"
+    private static let WAIT = "WAIT"
+
     case complete(Int)
+    case grow(Int)
+    case seed(source: Int, target: Int)
+    case wait
 
     init(stringLiteral value: String) {
-        if value == "WAIT" {
-            self = .wait
-        } else {
-            let index = Int(value.split(separator: " ")[1])!
-            self = .complete(index)
+        let params = value.split(separator: " ", maxSplits: 2, omittingEmptySubsequences: false)
+
+        switch "\(params[0])" {
+            case Self.COMPLETE: self = .complete(Int(params[1])!)
+            case Self.GROW: self = .grow(Int(params[1])!)
+            case Self.SEED: self = .seed(source: Int(params[1])!, target: Int(params[2])!)
+            default: self = .wait
         }
     }
 
     var description: String {
         switch self {
-            case .wait: return "WAIT"
-            case .complete(let index): return "COMPLETE \(index)"
+            case .complete(let index): return "\(Self.COMPLETE) \(index)"
+            case .grow(let source): return "\(Self.GROW) \(source)"
+            case .seed(source: let source, target: let target): return "\(Self.SEED) \(source) \(target)"
+            case .wait: return Self.WAIT
         }
     }
 }
 
+enum TreeSize: Int {
+    case seed = 0
+    case small
+    case medium
+    case big
+}
+
+struct Tree {
+    let cellIndex: Int
+    let isDormant: Bool
+    let isMine: Bool
+    let size: TreeSize
+}
+
+enum Richness: Int {
+    case unusable = 0
+    case low
+    case medium
+    case high
+}
+
+struct Cell {
+    let index: Int
+    let richness: Richness
+    let neigh0: Int
+    let neigh1: Int
+    let neigh2: Int
+    let neigh3: Int
+    let neigh4: Int
+    let neigh5: Int
+}
+
 func computeAction(possibleActions: [Action], sun: Int) -> Action {
-    var possibleActions = possibleActions.sorted {
+    let possibleActions = possibleActions.sorted {
         switch ($0, $1) {
             case (.wait, .wait): return true
             case (_, .wait): return true
             case (.wait, _): return false
             case (.complete(let idx0), .complete(let idx1)): return idx0 < idx1
+            default: return true
         }
     }
 
@@ -44,6 +88,8 @@ func computeAction(possibleActions: [Action], sun: Int) -> Action {
         return .wait
     }
 }
+
+
 ////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -52,6 +98,7 @@ func computeAction(possibleActions: [Action], sun: Int) -> Action {
  **/
 
 let numberOfCells = Int(readLine()!)! // 37
+var cells = [Cell]()
 if numberOfCells > 0 {
     for i in 0...(numberOfCells-1) {
         let inputs = (readLine()!).split(separator: " ").map(String.init)
@@ -63,12 +110,16 @@ if numberOfCells > 0 {
         let neigh3 = Int(inputs[5])!
         let neigh4 = Int(inputs[6])!
         let neigh5 = Int(inputs[7])!
+        let cell = Cell(index: index, richness: Richness(rawValue: richness)!,
+            neigh0: neigh0, neigh1: neigh1, neigh2: neigh2, neigh3: neigh3, neigh4: neigh4, neigh5: neigh5)
+        cells.append(cell)
     }
 }
 
 // game loop
 while true {
     let day = Int(readLine()!)! // the game lasts 24 days: 0-23
+    let sunDirection = day % 6
     let nutrients = Int(readLine()!)! // the base score you gain from the next COMPLETE action
     let inputs = (readLine()!).split(separator: " ").map(String.init)
     let sun = Int(inputs[0])! // your sun points
@@ -78,6 +129,7 @@ while true {
     let oppScore = Int(inputs2[1])! // opponent's score
     let oppIsWaiting = inputs2[2] != "0" // whether your opponent is asleep until the next day
     let numberOfTrees = Int(readLine()!)! // the current amount of trees
+    var trees = [Tree]()
     if numberOfTrees > 0 {
         for i in 0...(numberOfTrees-1) {
             let inputs = (readLine()!).split(separator: " ").map(String.init)
@@ -85,6 +137,7 @@ while true {
             let size = Int(inputs[1])! // size of this tree: 0-3
             let isMine = inputs[2] != "0" // 1 if this is your tree
             let isDormant = inputs[3] != "0" // 1 if this tree is dormant
+            trees.append(Tree(cellIndex: cellIndex, isDormant: isDormant, isMine: isMine, size: TreeSize(rawValue: size)!))
         }
     }
     let numberOfPossibleActions = Int(readLine()!)! // all legal actions
@@ -92,7 +145,9 @@ while true {
     if numberOfPossibleActions > 0 {
         for i in 0...(numberOfPossibleActions-1) {
             let possibleAction = readLine()! // try printing something from here to start with
-            possibleActions.append(Action(stringLiteral: possibleAction))
+            let action = Action(stringLiteral: possibleAction)
+            print(action, to: &errStream)
+            possibleActions.append(action)
         }
     }
 
