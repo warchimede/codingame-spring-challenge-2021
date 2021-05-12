@@ -159,6 +159,11 @@ func day5To12(trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action
     // - seed corners
     // - seed once
 
+    if shouldWait {
+        shouldWait = false
+        return .wait
+    }
+
     let growCenter = grow.first { return $0 == .grow(centerIdx) }
     if let action = growCenter { return action }
 
@@ -190,14 +195,58 @@ func day5To12(trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action
     }
     if let action = seedCorner { return action }
 
+    if let action = seed.first {
+        shouldWait = true
+        return action
+    }
+
     return .wait
 }
 
 func day13To18(trees: [Tree], complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
+    if shouldWait {
+        shouldWait = false
+        return .wait
+    }
+
     let completeExceptCorners = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
     if let action = completeExceptCorners { return action }
 
-    return day5To12(trees: trees, grow: grow, seed: seed, sun: sun)
+    let growCenter = grow.first { return $0 == .grow(centerIdx) }
+    if let action = growCenter { return action }
+
+    let growCorner = grow.first {
+        if case let .grow(target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = growCorner { return action }
+
+    if let action = grow.first {
+        return action
+    }
+
+    let seedCenter = seed.first {
+        if case .seed(source: _, target: centerIdx) = $0 { return true }
+        return false
+    }
+    if let action = seedCenter { return action }
+
+    let seedCorner = seed.first {
+        if case let .seed(source: _, target: target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = seedCorner { return action }
+
+    if let action = seed.first {
+        shouldWait = true
+        return action
+    }
+
+    return .wait
 }
 
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
