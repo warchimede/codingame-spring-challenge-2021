@@ -169,7 +169,7 @@ func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
     return .wait
 }
 
-func day5(grow: [Action], seed: [Action], sun: Int) -> Action {
+func day5To12(grow: [Action], seed: [Action], sun: Int) -> Action {
     // - grow center
     // - grow corners
     // - grow
@@ -214,6 +214,17 @@ func day5(grow: [Action], seed: [Action], sun: Int) -> Action {
     return .wait
 }
 
+func day13Plus(complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
+    // - complete except 0 and corners
+    // - day5To12() ?
+
+    // let completeExceptCenter = complete.first { $0 != .complete(centerIdx) && !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
+    let completeExceptCenter = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
+    if let action = completeExceptCenter { return action }
+
+    return day5To12(grow: grow, seed: seed, sun: sun)
+}
+
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
     let grow = growActions(from: possibleActions)
     let seed = seedActions(from: possibleActions)
@@ -225,8 +236,8 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 2: return grow.first ?? seed.first ?? .wait
     case 3: return day3(grow: grow, seed: seed, sun: sun)
     case 4: return day4(grow: grow, seed: seed, sun: sun)
-    case let d where d <= 12: return day5(grow: grow, seed: seed, sun: sun)
-    default: return complete.last ?? day5(grow: grow, seed: seed, sun: sun)
+    case let d where d <= 12: return day5To12(grow: grow, seed: seed, sun: sun)
+    default: return day13Plus(complete: complete, grow: grow, seed: seed, sun: sun)
     }
 }
 
