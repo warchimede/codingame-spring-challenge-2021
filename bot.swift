@@ -7,7 +7,7 @@ public struct StderrOutputStream: TextOutputStream {
 public var errStream = StderrOutputStream()
 
 ////////////////////////////////////////////////////////////////////////////
-enum Action: ExpressibleByStringLiteral, CustomStringConvertible {
+enum Action: ExpressibleByStringLiteral, CustomStringConvertible, Equatable {
     private static let COMPLETE = "COMPLETE"
     private static let GROW = "GROW"
     private static let SEED = "SEED"
@@ -71,6 +71,9 @@ struct Cell {
     let neigh5: Int
 }
 
+let centerIdx = 0
+let cornersIdx = [19, 22, 25, 28, 31, 34]
+
 func growActions(from possibleActions: [Action]) -> [Action] {
     return possibleActions.filter {
         switch $0 {
@@ -119,26 +122,102 @@ func completeActions(from possibleActions: [Action]) -> [Action] {
     }
 }
 
-func computeAction(possibleActions: [Action], day: Int) -> Action {
+func day3(grow: [Action], seed: [Action], sun: Int) -> Action {
+    if sun >= 4 {
+        return grow.first ?? seed.first ?? .wait
+    }
+
+    return .wait
+}
+
+func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
+    // Seed center when possible
+    let seedCenter = seed.first {
+        if case .seed(source: _, target: centerIdx) = $0 { return true }
+        return false
+    }
+    if let action = seedCenter { return action }
+
+    if let action = grow.first { return action }
+
+    let seedCorner = seed.first {
+        if case let .seed(source: _, target: target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = seedCorner { return action }
+
+    return .wait
+}
+
+func day5To12(trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
+    // - grow center
+    // - grow corners to medium max
+    // - grow
+    // - seed center
+    // - seed corners
+    // - seed once
+
+    let growCenter = grow.first { return $0 == .grow(centerIdx) }
+    if let action = growCenter { return action }
+
+    let growCorner = grow.first {
+        if case let .grow(target) = $0 {
+            let isCorner = cornersIdx.contains(target)
+            let isSeedOrSmall = trees.first { $0.cellIndex == target && $0.size != .medium } != nil
+            return isCorner && isSeedOrSmall
+        }
+        return false
+    }
+    if let action = growCorner { return action }
+
+    if let action = grow.first {
+        return action
+    }
+
+    let seedCenter = seed.first {
+        if case .seed(source: _, target: centerIdx) = $0 { return true }
+        return false
+    }
+    if let action = seedCenter { return action }
+
+    let seedCorner = seed.first {
+        if case let .seed(source: _, target: target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = seedCorner { return action }
+
+    return .wait
+}
+
+func day13To18(trees: [Tree], complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
+    let completeExceptCorners = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
+    if let action = completeExceptCorners { return action }
+
+    return day5To12(trees: trees, grow: grow, seed: seed, sun: sun)
+}
+
+func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
     let grow = growActions(from: possibleActions)
     let seed = seedActions(from: possibleActions)
     let complete = completeActions(from: possibleActions)
 
-    if day == 0 {
-        return .wait
-    }
-
-    if day == 1 {
-        return grow.first ?? .wait
-    }
-
-    if day <= 18 {
-        return grow.first ?? seed.first ?? .wait    
-    } else {
-        return complete.first ?? grow.first ?? seed.first ?? .wait
+    switch day {
+    case 0: return .wait
+    case 1: return grow.first ?? .wait
+    case 2: return grow.first ?? seed.first ?? .wait
+    case 3: return day3(grow: grow, seed: seed, sun: sun)
+    case 4: return day4(grow: grow, seed: seed, sun: sun)
+    case let d where d <= 12: return day5To12(trees: trees, grow: grow, seed: seed, sun: sun)
+    case let d where d <= 18: return day13To18(trees: trees, complete: complete, grow: grow, seed: seed, sun: sun)
+    default: return complete.first ?? grow.first ?? .wait
     }
 }
 
+var shouldWait = false
 ////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -201,7 +280,7 @@ while true {
 
     // Write an action using print("message...")
     // To debug: print("Debug messages...", to: &errStream)
-    let action = computeAction(possibleActions: possibleActions, day: day)
+    let action = computeAction(possibleActions: possibleActions, trees: trees, cells: cells, day: day, sun: sun)
 
     // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
     print(action.description)
