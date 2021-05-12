@@ -7,7 +7,7 @@ public struct StderrOutputStream: TextOutputStream {
 public var errStream = StderrOutputStream()
 
 ////////////////////////////////////////////////////////////////////////////
-enum Action: ExpressibleByStringLiteral, CustomStringConvertible {
+enum Action: ExpressibleByStringLiteral, CustomStringConvertible, Equatable {
     private static let COMPLETE = "COMPLETE"
     private static let GROW = "GROW"
     private static let SEED = "SEED"
@@ -170,11 +170,48 @@ func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
 }
 
 func day5(grow: [Action], seed: [Action], sun: Int) -> Action {
-    // TODO:
     // - grow center
     // - grow corners
+    // - grow
+    // - seed center
     // - seed corners
     // - seed once
+
+    let growCenter = grow.first { return $0 == .grow(centerIdx) }
+    if let action = growCenter { return action }
+
+    let growCorner = grow.first {
+        if case let .grow(target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = growCorner { return action }
+
+    if let action = grow.first {
+        return action
+    }
+
+    let seedCenter = seed.first {
+        if case .seed(source: _, target: centerIdx) = $0 { return true }
+        return false
+    }
+    if let action = seedCenter { return action }
+
+    let seedCorner = seed.first {
+        if case let .seed(source: _, target: target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = seedCorner { return action }
+
+    if let action = seed.first {
+        shouldWait = true
+        return action
+    }
+
+    return .wait
 }
 
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
@@ -188,8 +225,8 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 2: return grow.first ?? seed.first ?? .wait
     case 3: return day3(grow: grow, seed: seed, sun: sun)
     case 4: return day4(grow: grow, seed: seed, sun: sun)
-    case let d where d <= 18: return grow.first ?? seed.first ?? .wait
-    default: return complete.first ?? grow.first ?? seed.first ?? .wait
+    case let d where d <= 12: return day5(grow: grow, seed: seed, sun: sun)
+    default: return complete.last ?? day5(grow: grow, seed: seed, sun: sun)
     }
 }
 
