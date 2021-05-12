@@ -119,26 +119,38 @@ func completeActions(from possibleActions: [Action]) -> [Action] {
     }
 }
 
-func computeAction(possibleActions: [Action], day: Int) -> Action {
+func day3(grow: [Action], seed: [Action], sun: Int) -> Action {
+    if shouldWait {
+        shouldWait = false
+        return .wait
+    }
+
+    if sun >= 4 {
+        return grow.first ?? seed.first ?? .wait
+    } else if sun >= 3 {
+        shouldWait = true
+        return seed.first ?? .wait
+    } else {
+        return .wait
+    }
+}
+
+func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
     let grow = growActions(from: possibleActions)
     let seed = seedActions(from: possibleActions)
     let complete = completeActions(from: possibleActions)
 
-    if day == 0 {
-        return .wait
-    }
-
-    if day == 1 {
-        return grow.first ?? .wait
-    }
-
-    if day <= 18 {
-        return grow.first ?? seed.first ?? .wait    
-    } else {
-        return complete.first ?? grow.first ?? seed.first ?? .wait
+    switch day {
+    case 0: return .wait
+    case 1: return grow.first ?? .wait
+    case 2: return grow.first ?? seed.first ?? .wait
+    case 3: return day3(grow: grow, seed: seed, sun: sun)
+    case let d where d <= 18: return grow.first ?? seed.first ?? .wait
+    default: return complete.first ?? grow.first ?? seed.first ?? .wait
     }
 }
 
+var shouldWait = false
 ////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -201,7 +213,7 @@ while true {
 
     // Write an action using print("message...")
     // To debug: print("Debug messages...", to: &errStream)
-    let action = computeAction(possibleActions: possibleActions, day: day)
+    let action = computeAction(possibleActions: possibleActions, trees: trees, cells: cells, day: day, sun: sun)
 
     // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
     print(action.description)
