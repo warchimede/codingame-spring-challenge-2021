@@ -153,12 +153,28 @@ func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
 
     if let action = grow.first { return action }
 
+    let seedCorner = seed.first {
+        if case let .seed(source: _, target: target) = $0 {
+            return cornersIdx.contains(target)
+        }
+        return false
+    }
+    if let action = seedCorner { return action }
+
     if let action = seed.first {
         shouldWait = true
         return action
     }
 
     return .wait
+}
+
+func day5(grow: [Action], seed: [Action], sun: Int) -> Action {
+    // TODO:
+    // - grow center
+    // - grow corners
+    // - seed corners
+    // - seed once
 }
 
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
