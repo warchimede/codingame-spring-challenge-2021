@@ -135,6 +135,21 @@ func day3(grow: [Action], seed: [Action], sun: Int) -> Action {
     }
 }
 
+func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
+    if shouldWait {
+        shouldWait = false
+        return .wait
+    }
+
+    if let action = grow.first { return action }
+    if let action = seed.first {
+        shouldWait = true
+        return action
+    }
+
+    return .wait
+}
+
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
     let grow = growActions(from: possibleActions)
     let seed = seedActions(from: possibleActions)
@@ -144,7 +159,8 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 0: return .wait
     case 1: return grow.first ?? .wait
     case 2: return grow.first ?? seed.first ?? .wait
-    case 3: return day3(grow: grow, seed: seed, sun: sun)
+    case 3: return day4(grow: grow, seed: seed, sun: sun)
+    case 4: return day4(grow: grow, seed: seed, sun: sun)
     case let d where d <= 18: return grow.first ?? seed.first ?? .wait
     default: return complete.first ?? grow.first ?? seed.first ?? .wait
     }
