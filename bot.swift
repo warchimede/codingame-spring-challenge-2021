@@ -123,27 +123,14 @@ func completeActions(from possibleActions: [Action]) -> [Action] {
 }
 
 func day3(grow: [Action], seed: [Action], sun: Int) -> Action {
-    if shouldWait {
-        shouldWait = false
-        return .wait
-    }
-
     if sun >= 4 {
         return grow.first ?? seed.first ?? .wait
-    } else if sun >= 3 {
-        shouldWait = true
-        return seed.first ?? .wait
-    } else {
-        return .wait
     }
+
+    return .wait
 }
 
 func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
-    if shouldWait {
-        shouldWait = false
-        return .wait
-    }
-
     // Seed center when possible
     let seedCenter = seed.first {
         if case .seed(source: _, target: centerIdx) = $0 { return true }
@@ -161,17 +148,12 @@ func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
     }
     if let action = seedCorner { return action }
 
-    if let action = seed.first {
-        shouldWait = true
-        return action
-    }
-
     return .wait
 }
 
-func day5To12(grow: [Action], seed: [Action], sun: Int) -> Action {
+func day5To12(trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
     // - grow center
-    // - grow corners
+    // - grow corners to medium max
     // - grow
     // - seed center
     // - seed corners
@@ -182,7 +164,9 @@ func day5To12(grow: [Action], seed: [Action], sun: Int) -> Action {
 
     let growCorner = grow.first {
         if case let .grow(target) = $0 {
-            return cornersIdx.contains(target)
+            let isCorner = cornersIdx.contains(target)
+            let isSeedOrSmall = trees.first { $0.cellIndex == target && $0.size != .medium } != nil
+            return isCorner && isSeedOrSmall
         }
         return false
     }
@@ -206,23 +190,14 @@ func day5To12(grow: [Action], seed: [Action], sun: Int) -> Action {
     }
     if let action = seedCorner { return action }
 
-    if let action = seed.first {
-        shouldWait = true
-        return action
-    }
-
     return .wait
 }
 
-func day13Plus(complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
-    // - complete except 0 and corners
-    // - day5To12() ?
+func day13To18(trees: [Tree], complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
+    let completeExceptCorners = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
+    if let action = completeExceptCorners { return action }
 
-    // let completeExceptCenter = complete.first { $0 != .complete(centerIdx) && !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
-    let completeExceptCenter = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
-    if let action = completeExceptCenter { return action }
-
-    return day5To12(grow: grow, seed: seed, sun: sun)
+    return day5To12(trees: trees, grow: grow, seed: seed, sun: sun)
 }
 
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
@@ -236,8 +211,9 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 2: return grow.first ?? seed.first ?? .wait
     case 3: return day3(grow: grow, seed: seed, sun: sun)
     case 4: return day4(grow: grow, seed: seed, sun: sun)
-    case let d where d <= 12: return day5To12(grow: grow, seed: seed, sun: sun)
-    default: return day13Plus(complete: complete, grow: grow, seed: seed, sun: sun)
+    case let d where d <= 12: return day5To12(trees: trees, grow: grow, seed: seed, sun: sun)
+    case let d where d <= 18: return day13To18(trees: trees, complete: complete, grow: grow, seed: seed, sun: sun)
+    default: return complete.first ?? grow.first ?? .wait
     }
 }
 
