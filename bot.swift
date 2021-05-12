@@ -71,6 +71,9 @@ struct Cell {
     let neigh5: Int
 }
 
+let centerIdx = 0
+let cornersIdx = [19, 22, 25, 28, 31, 34]
+
 func growActions(from possibleActions: [Action]) -> [Action] {
     return possibleActions.filter {
         switch $0 {
@@ -143,12 +146,13 @@ func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
 
     // Seed center when possible
     let seedCenter = seed.first {
-        if case .seed(source: _, target: 0) = $0 { return true }
+        if case .seed(source: _, target: centerIdx) = $0 { return true }
         return false
     }
     if let action = seedCenter { return action }
 
     if let action = grow.first { return action }
+
     if let action = seed.first {
         shouldWait = true
         return action
