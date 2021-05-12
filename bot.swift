@@ -141,6 +141,13 @@ func day4(grow: [Action], seed: [Action], sun: Int) -> Action {
         return .wait
     }
 
+    // Seed center when possible
+    let seedCenter = seed.first {
+        if case .seed(source: _, target: 0) = $0 { return true }
+        return false
+    }
+    if let action = seedCenter { return action }
+
     if let action = grow.first { return action }
     if let action = seed.first {
         shouldWait = true
@@ -159,7 +166,7 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 0: return .wait
     case 1: return grow.first ?? .wait
     case 2: return grow.first ?? seed.first ?? .wait
-    case 3: return day4(grow: grow, seed: seed, sun: sun)
+    case 3: return day3(grow: grow, seed: seed, sun: sun)
     case 4: return day4(grow: grow, seed: seed, sun: sun)
     case let d where d <= 18: return grow.first ?? seed.first ?? .wait
     default: return complete.first ?? grow.first ?? seed.first ?? .wait
