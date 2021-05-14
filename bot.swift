@@ -95,6 +95,10 @@ func growActions(from possibleActions: [Action]) -> [Action] {
     }
 }
 
+func growCenter(center: Int = centerIdx, actions: [Action]) -> Action? {
+    return actions.first { return $0 == .grow(centerIdx) }
+}
+
 // SEED
 func seedActions(from possibleActions: [Action]) -> [Action] {
     return possibleActions.filter {
@@ -197,8 +201,7 @@ func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
         return .wait
     }
 
-    let growCenter = grow.first { return $0 == .grow(centerIdx) }
-    if let action = growCenter { return action }
+    if let action = growCenter(actions: grow) { return action }
 
     let growCorner = grow.first {
         if case let .grow(target) = $0 {
@@ -235,8 +238,7 @@ func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action],
     let completeExceptCorners = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
     if let action = completeExceptCorners { return action }
 
-    let growCenter = grow.first { return $0 == .grow(centerIdx) }
-    if let action = growCenter { return action }
+    if let action = growCenter(actions: grow) { return action }
 
     let growCorner = grow.first {
         if case let .grow(target) = $0 {
