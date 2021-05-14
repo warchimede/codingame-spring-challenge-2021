@@ -226,9 +226,10 @@ func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
 
     if let action = growCorner(size: .seed, trees: trees, actions: grow) { return action }
     if let action = growCorner(size: .small, trees: trees, actions: grow) { return action }
-    if let action = growCorner(size: .medium, trees: trees, actions: grow) { return action }
 
     if let action = growSize(.seed, trees: trees, actions: grow) { return action }
+    if let action = growSize(.medium, trees: trees, actions: grow) { return action }
+    if let action = growSize(.small, trees: trees, actions: grow) { return action }
     if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
@@ -256,9 +257,10 @@ func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action],
 
     if let action = growCorner(size: .seed, trees: trees, actions: grow) { return action }
     if let action = growCorner(size: .small, trees: trees, actions: grow) { return action }
-    if let action = growCorner(size: .medium, trees: trees, actions: grow) { return action }
 
     if let action = growSize(.seed, trees: trees, actions: grow) { return action }
+    if let action = growSize(.medium, trees: trees, actions: grow) { return action }
+    if let action = growSize(.small, trees: trees, actions: grow) { return action }
     if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
