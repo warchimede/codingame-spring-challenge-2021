@@ -130,6 +130,22 @@ func seedCorner(cells: [Cell], corners: [Int] = cornersIdx, actions: [Action]) -
     }
 }
 
+func seedNoNeigh(cells: [Cell], trees: [Tree], actions: [Action]) -> Action? {
+    let myTrees = trees.filter { $0.isMine }
+
+    return actions.first {
+        if case let .seed(source: _, target: target) = $0 {
+            let targetCell = cells[target]
+
+            return myTrees.reduce(true, { res, tree in
+                let cell = cells[tree.cellIndex]
+                return res && !cell.isNeigh(cell: targetCell)
+            })
+        }
+        return false
+    }
+}
+
 // COMPLETE
 func completeActions(from possibleActions: [Action]) -> [Action] {
     return possibleActions.filter {
@@ -147,14 +163,14 @@ func completeActions(from possibleActions: [Action]) -> [Action] {
     }
 }
 
-func day3(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
+func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
     if let action = grow.first { return action }
 
     guard sun >= 3 else { return .wait }
 
     if let action = seedCorner(cells: cells, actions: seed) { return action }
 
-    return seed.first ?? .wait
+    return seedNoNeigh(cells: cells, trees: trees, actions: seed) ?? .wait
 }
 
 func day4(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
@@ -202,7 +218,7 @@ func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
 
     if let action = seedCorner(cells: cells, actions: seed) { return action }
 
-    if let action = seed.first {
+    if let action = seedNoNeigh(cells: cells, trees: trees, actions: seed) {
         shouldWait = true
         return action
     }
@@ -238,7 +254,7 @@ func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action],
 
     if let action = seedCorner(cells: cells, actions: seed) { return action }
 
-    if let action = seed.first {
+    if let action = seedNoNeigh(cells: cells, trees: trees, actions: seed) {
         shouldWait = true
         return action
     }
@@ -255,7 +271,7 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 0: return .wait
     case 1: return grow.first ?? .wait
     case 2: return grow.first ?? seed.first ?? .wait
-    case 3: return day3(cells: cells, grow: grow, seed: seed, sun: sun)
+    case 3: return day3(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
     case 4: return day4(cells: cells, grow: grow, seed: seed, sun: sun)
     case let d where d <= 12: return day5To12(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
     case let d where d <= 18: return day13To18(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed, sun: sun)
