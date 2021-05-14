@@ -99,6 +99,27 @@ func growCenter(center: Int = centerIdx, actions: [Action]) -> Action? {
     return actions.first { return $0 == .grow(centerIdx) }
 }
 
+func growCorner(size: TreeSize, corners: [Int] = cornersIdx, trees: [Tree], actions: [Action]) -> Action? {
+    return actions.first {
+        if case let .grow(target) = $0 {
+            let isCorner = corners.contains(target)
+            let isRightSize = trees.first { $0.cellIndex == target && $0.size == size } != nil
+            return isCorner && isRightSize
+        }
+        return false
+    }
+}
+
+func growSize(_ size: TreeSize, trees: [Tree], actions: [Action]) -> Action? {
+    return actions.first {
+        if case let .grow(target) = $0 {
+            let isRightSize = trees.first { $0.cellIndex == target && $0.size == size } != nil
+            return isRightSize
+        }
+        return false
+    }
+}
+
 // SEED
 func seedActions(from possibleActions: [Action]) -> [Action] {
     return possibleActions.filter {
@@ -203,19 +224,12 @@ func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
 
     if let action = growCenter(actions: grow) { return action }
 
-    let growCorner = grow.first {
-        if case let .grow(target) = $0 {
-            let isCorner = cornersIdx.contains(target)
-            let isSeedOrSmall = trees.first { $0.cellIndex == target && $0.size != .medium } != nil
-            return isCorner && isSeedOrSmall
-        }
-        return false
-    }
-    if let action = growCorner { return action }
+    if let action = growCorner(size: .seed, trees: trees, actions: grow) { return action }
+    if let action = growCorner(size: .small, trees: trees, actions: grow) { return action }
+    if let action = growCorner(size: .medium, trees: trees, actions: grow) { return action }
 
-    if let action = grow.first {
-        return action
-    }
+    if let action = growSize(.seed, trees: trees, actions: grow) { return action }
+    if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
 
@@ -240,17 +254,12 @@ func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action],
 
     if let action = growCenter(actions: grow) { return action }
 
-    let growCorner = grow.first {
-        if case let .grow(target) = $0 {
-            return cornersIdx.contains(target)
-        }
-        return false
-    }
-    if let action = growCorner { return action }
+    if let action = growCorner(size: .seed, trees: trees, actions: grow) { return action }
+    if let action = growCorner(size: .small, trees: trees, actions: grow) { return action }
+    if let action = growCorner(size: .medium, trees: trees, actions: grow) { return action }
 
-    if let action = grow.first {
-        return action
-    }
+    if let action = growSize(.seed, trees: trees, actions: grow) { return action }
+    if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
 
