@@ -112,6 +112,13 @@ func seedActions(from possibleActions: [Action]) -> [Action] {
     }
 }
 
+func seedCenter(center: Int = centerIdx, actions: [Action]) -> Action? {
+    actions.first {
+        if case .seed(source: _, target: center) = $0 { return true }
+        return false
+    }
+}
+
 func seedCorner(cells: [Cell], actions: [Action]) -> Action? {
     return actions.first {
         if case let .seed(source: source, target: target) = $0 {
@@ -152,11 +159,7 @@ func day3(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
 
 func day4(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
     // Seed center when possible
-    let seedCenter = seed.first {
-        if case .seed(source: _, target: centerIdx) = $0 { return true }
-        return false
-    }
-    if let action = seedCenter { return action }
+    if let action = seedCenter(actions: seed) { return action }
 
     if let action = grow.first { return action }
 
@@ -195,11 +198,7 @@ func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
         return action
     }
 
-    let seedCenter = seed.first {
-        if case .seed(source: _, target: centerIdx) = $0 { return true }
-        return false
-    }
-    if let action = seedCenter { return action }
+    if let action = seedCenter(actions: seed) { return action }
 
     if let action = seedCorner(cells: cells, actions: seed) { return action }
 
@@ -235,11 +234,7 @@ func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action],
         return action
     }
 
-    let seedCenter = seed.first {
-        if case .seed(source: _, target: centerIdx) = $0 { return true }
-        return false
-    }
-    if let action = seedCenter { return action }
+    if let action = seedCenter(actions: seed) { return action }
 
     if let action = seedCorner(cells: cells, actions: seed) { return action }
 
