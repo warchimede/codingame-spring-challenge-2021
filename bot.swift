@@ -119,12 +119,12 @@ func seedCenter(center: Int = centerIdx, actions: [Action]) -> Action? {
     }
 }
 
-func seedCorner(cells: [Cell], actions: [Action]) -> Action? {
+func seedCorner(cells: [Cell], corners: [Int] = cornersIdx, actions: [Action]) -> Action? {
     return actions.first {
         if case let .seed(source: source, target: target) = $0 {
             let sourceCell = cells[source]
             let targetCell = cells[target]
-            return cornersIdx.contains(target) && !sourceCell.isNeigh(cell: targetCell)
+            return corners.contains(target) && !sourceCell.isNeigh(cell: targetCell)
         }
         return false
     }
