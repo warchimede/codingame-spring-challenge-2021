@@ -204,8 +204,6 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
 }
 
 func day4(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
-    if let action = seedCenter(actions: seed) { return action }
-
     if let action = grow.first { return action }
 
     return .wait
