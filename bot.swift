@@ -203,13 +203,13 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
     return .wait
 }
 
-func day4(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
+func day4To5(cells: [Cell], grow: [Action]) -> Action {
     if let action = grow.first { return action }
 
     return .wait
 }
 
-func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
+func day6To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
     if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
@@ -252,8 +252,8 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 1: return grow.first ?? .wait
     case 2: return grow.first ?? seed.first ?? .wait
     case 3: return day3(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
-    case 4: return day4(cells: cells, grow: grow, seed: seed, sun: sun)
-    case let d where d <= 12: return day5To12(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
+    case let d where d <= 5: return day4To5(cells: cells, grow: grow)
+    case let d where d <= 12: return day6To12(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
     case let d where d <= 18: return day13To18(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed, sun: sun)
     default: return complete.first ?? grow.first ?? .wait
     }
