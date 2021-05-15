@@ -195,49 +195,24 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
 
     if let action = seedCorner(cells: cells, actions: seed) { return action }
 
-    return seedNoNeigh(cells: cells, trees: trees, actions: seed) ?? .wait
+    return .wait
 }
 
 func day4(cells: [Cell], grow: [Action], seed: [Action], sun: Int) -> Action {
-    // Seed center when possible
     if let action = seedCenter(actions: seed) { return action }
 
     if let action = grow.first { return action }
-
-    if let action = seedCorner(cells: cells, actions: seed) { return action }
 
     return .wait
 }
 
 func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
-    // - grow center
-    // - grow corners to medium max
-    // - grow
-    // - seed center
-    // - seed corners
-    // - seed once
-
-    if shouldWait {
-        shouldWait = false
-        return .wait
-    }
-
-    if let action = growCenter(actions: grow) { return action }
-
-    if let action = growCorner(size: .seed, trees: trees, actions: grow) { return action }
-    if let action = growCorner(size: .small, trees: trees, actions: grow) { return action }
-
-    if let action = growSize(.seed, trees: trees, actions: grow) { return action }
-    if let action = growSize(.medium, trees: trees, actions: grow) { return action }
-    if let action = growSize(.small, trees: trees, actions: grow) { return action }
     if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
 
-    if let action = seedCorner(cells: cells, actions: seed) { return action }
-
-    if let action = seedNoNeigh(cells: cells, trees: trees, actions: seed) {
-        shouldWait = true
+    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
+        let action = seed.first {
         return action
     }
 
@@ -245,30 +220,19 @@ func day5To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
 }
 
 func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
-    if shouldWait {
-        shouldWait = false
-        return .wait
+    if trees.filter({ $0.isMine && $0.size == .big }).count > 1 {
+        if let action = complete.first { return action }
     }
 
-    let completeExceptCorners = complete.first { !(cornersIdx.map { idx in .complete(idx) }).contains($0) }
-    if let action = completeExceptCorners { return action }
-
-    if let action = growCenter(actions: grow) { return action }
-
-    if let action = growCorner(size: .seed, trees: trees, actions: grow) { return action }
-    if let action = growCorner(size: .small, trees: trees, actions: grow) { return action }
-
-    if let action = growSize(.seed, trees: trees, actions: grow) { return action }
     if let action = growSize(.medium, trees: trees, actions: grow) { return action }
     if let action = growSize(.small, trees: trees, actions: grow) { return action }
+    if let action = growSize(.seed, trees: trees, actions: grow) { return action }
     if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
 
-    if let action = seedCorner(cells: cells, actions: seed) { return action }
-
-    if let action = seedNoNeigh(cells: cells, trees: trees, actions: seed) {
-        shouldWait = true
+    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
+        let action = seed.first {
         return action
     }
 
@@ -292,7 +256,6 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     }
 }
 
-var shouldWait = false
 ////////////////////////////////////////////////////////////////////////////
 
 /**
