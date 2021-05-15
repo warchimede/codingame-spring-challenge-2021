@@ -188,6 +188,7 @@ func completeActions(from possibleActions: [Action]) -> [Action] {
     }
 }
 
+// EVALUATIONS
 func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
     if let action = grow.first { return action }
 
@@ -203,13 +204,7 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
     return .wait
 }
 
-func day4To5(cells: [Cell], grow: [Action]) -> Action {
-    if let action = grow.first { return action }
-
-    return .wait
-}
-
-func day6To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int) -> Action {
+func day6To12(trees: [Tree], grow: [Action], seed: [Action]) -> Action {
     if let action = grow.first { return action }
 
     if let action = seedCenter(actions: seed) { return action }
@@ -222,7 +217,7 @@ func day6To12(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun:
     return .wait
 }
 
-func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action], sun: Int) -> Action {
+func day13To18(trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
     if trees.filter({ $0.isMine && $0.size == .big }).count > 1 {
         if let action = complete.first { return action }
     }
@@ -252,9 +247,9 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 1: return grow.first ?? .wait
     case 2: return grow.first ?? seed.first ?? .wait
     case 3: return day3(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
-    case let d where d <= 5: return day4To5(cells: cells, grow: grow)
-    case let d where d <= 12: return day6To12(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
-    case let d where d <= 18: return day13To18(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed, sun: sun)
+    case let d where d <= 5: return grow.first ?? .wait
+    case let d where d <= 12: return day6To12(trees: trees, grow: grow, seed: seed)
+    case let d where d <= 18: return day13To18(trees: trees, complete: complete, grow: grow, seed: seed)
     default: return complete.first ?? grow.first ?? .wait
     }
 }
