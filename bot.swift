@@ -193,7 +193,12 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
 
     guard sun >= 3 else { return .wait }
 
-    if let action = seedCorner(cells: cells, actions: seed) { return action }
+    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
+        let action = seedCorner(cells: cells, actions: seed) {
+        return action
+    }
+
+    if let action = seed.first { return action }
 
     return .wait
 }
