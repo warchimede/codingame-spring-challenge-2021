@@ -194,39 +194,12 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
 
     guard sun >= 3 else { return .wait }
 
-    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
-        let action = seedCorner(cells: cells, actions: seed) {
-        return action
-    }
-
-    if let action = seed.first { return action }
+    if let action = seedNoNeigh(cells: cells, trees: trees, actions: seed) { return action }
 
     return .wait
 }
 
 func day10(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
-    if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
-        let action = complete.first {
-        return action
-    }
-
-    return grow.first
-    ?? seedNoNeigh(cells: cells, trees: trees, actions: seed)
-    ?? .wait
-}
-
-func day11(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
-    if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
-        let action = complete.first {
-        return action
-    }
-
-    return grow.first
-    ?? seedNoNeigh(cells: cells, trees: trees, actions: seed)
-    ?? .wait
-}
-
-func day12(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
     if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
         let action = complete.first {
         return action
