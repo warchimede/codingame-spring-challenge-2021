@@ -204,52 +204,47 @@ func day3(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action], sun: Int
     return .wait
 }
 
-func day6To7(cells: [Cell], trees: [Tree], grow: [Action], seed: [Action]) -> Action {
+func day10(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
+    if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
+        let action = complete.first {
+        return action
+    }
+
     return grow.first
     ?? seedNoNeigh(cells: cells, trees: trees, actions: seed)
     ?? .wait
 }
 
-func day8To9(trees: [Tree], grow: [Action], seed: [Action]) -> Action {
-    if let action = grow.first { return action }
-
-    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
-        let action = seed.first {
+func day11(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
+    if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
+        let action = complete.first {
         return action
     }
 
-    return .wait
+    return grow.first ?? .wait
 }
 
-func day10To12(trees: [Tree], grow: [Action], seed: [Action]) -> Action {
-    if let action = grow.first { return action }
-
-    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
-        let action = seed.first {
+func day12(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
+    if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
+        let action = complete.first {
         return action
     }
 
-    return .wait
+    return grow.first
+    ?? seedNoNeigh(cells: cells, trees: trees, actions: seed)
+    ?? .wait
 }
 
-func day13To18(trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
-    if trees.filter({ $0.isMine && $0.size == .big }).count > 1 {
-        if let action = complete.first { return action }
-    }
-
-    if let action = growSize(.medium, trees: trees, actions: grow) { return action }
-    if let action = growSize(.small, trees: trees, actions: grow) { return action }
-    if let action = growSize(.seed, trees: trees, actions: grow) { return action }
-    if let action = grow.first { return action }
-
-    if let action = seedCenter(actions: seed) { return action }
-
-    if trees.filter({ $0.isMine && $0.size == .seed }).count == 0,
-        let action = seed.first {
+func day13To18(cells: [Cell], trees: [Tree], complete: [Action], grow: [Action], seed: [Action]) -> Action {
+    if trees.filter({ $0.isMine && $0.size == .big }).count > 2,
+        let action = complete.first {
         return action
     }
 
-    return .wait
+    return grow.first
+    ?? seedNoNeigh(cells: cells, trees: trees, actions: seed)
+    ?? seed.first
+    ?? .wait
 }
 
 func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day: Int, sun: Int) -> Action {
@@ -262,11 +257,17 @@ func computeAction(possibleActions: [Action], trees: [Tree], cells: [Cell], day:
     case 1: return grow.first ?? .wait
     case 2: return grow.first ?? seed.first ?? .wait
     case 3: return day3(cells: cells, trees: trees, grow: grow, seed: seed, sun: sun)
-    case 4, 5: return grow.first ?? .wait
-    case 6, 7: return day6To7(cells: cells, trees: trees, grow: grow, seed: seed)
-    case 8, 9: return day8To9(trees: trees, grow: grow, seed: seed)
-    case let d where d <= 12: return day10To12(trees: trees, grow: grow, seed: seed)
-    case let d where d <= 18: return day13To18(trees: trees, complete: complete, grow: grow, seed: seed)
+    case 4: return grow.first ?? .wait
+    case 5: return growSize(.medium, trees: trees, actions: grow)
+                ?? grow.first
+                ?? .wait
+    case let d where d <= 9: return grow.first
+                                ?? seedNoNeigh(cells: cells, trees: trees, actions: seed)
+                                ?? .wait
+    case 10: return day10(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed)
+    case 11: return day11(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed)
+    case 12: return day12(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed)
+    case let d where d <= 18: return day13To18(cells: cells, trees: trees, complete: complete, grow: grow, seed: seed)
     default: return complete.first ?? grow.first ?? .wait
     }
 }
